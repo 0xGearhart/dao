@@ -9,11 +9,11 @@ contract SimpleStorage is Ownable {
 
     event NumberChanged(uint256 indexed newNumber);
 
-    constructor(address _owner) Ownable(_owner) {}
+    constructor(address owner) Ownable(owner) {}
 
-    function changeNumber(uint256 _newNumber) external onlyOwner {
-        s_number = _newNumber;
-        emit NumberChanged(_newNumber);
+    function changeNumber(uint256 newNumber) external onlyOwner {
+        s_number = newNumber;
+        emit NumberChanged(newNumber);
     }
 
     function getNumber() external view returns (uint256) {

@@ -24,14 +24,14 @@ contract DaoGovernor is
     GovernorTimelockControl
 {
     constructor(
-        IVotes _token,
-        TimelockController _timelock
+        IVotes token,
+        TimelockController timelock
     )
         Governor("DaoGovernor")
         GovernorSettings(1 days, 1 weeks, 0)
-        GovernorVotes(_token)
+        GovernorVotes(token)
         GovernorVotesQuorumFraction(10)
-        GovernorTimelockControl(_timelock)
+        GovernorTimelockControl(timelock)
     {}
 
     // The following functions are overrides required by Solidity.

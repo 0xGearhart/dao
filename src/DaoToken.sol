@@ -9,15 +9,15 @@ import {Nonces} from "@openzeppelin/contracts/utils/Nonces.sol";
 
 contract DaoToken is ERC20, ERC20Permit, ERC20Votes {
     constructor(
-        address _tokenReceiver,
-        string memory _name,
-        string memory _symbol,
-        uint256 _initialSupply
+        address tokenReceiver,
+        string memory name,
+        string memory symbol,
+        uint256 initialSupply
     )
-        ERC20(_name, _symbol)
-        ERC20Permit(_name)
+        ERC20(name, symbol)
+        ERC20Permit(name)
     {
-        _mint(_tokenReceiver, _initialSupply);
+        _mint(tokenReceiver, initialSupply);
     }
 
     function clock() public view override returns (uint48) {
