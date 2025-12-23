@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-// Compatible with OpenZeppelin Contracts ^5.5.0
+
 pragma solidity ^0.8.27;
 
-import {Governor} from "@openzeppelin/contracts/governance/Governor.sol";
+import {Governor, IGovernor} from "@openzeppelin/contracts/governance/Governor.sol";
 import {TimelockController} from "@openzeppelin/contracts/governance/TimelockController.sol";
 import {GovernorCountingSimple} from "@openzeppelin/contracts/governance/extensions/GovernorCountingSimple.sol";
 import {GovernorSettings} from "@openzeppelin/contracts/governance/extensions/GovernorSettings.sol";
@@ -14,6 +14,12 @@ import {
 } from "@openzeppelin/contracts/governance/extensions/GovernorVotesQuorumFraction.sol";
 import {IVotes} from "@openzeppelin/contracts/governance/utils/IVotes.sol";
 
+/**
+ * @title DaoGovernor
+ * @author Dustin Gearhart
+ * @notice Main contract to facilitate governance and voting based on ERC20 DaoToken balance snapshots.
+ * @dev Compatible with OpenZeppelin Contracts ^5.5.0
+ */
 contract DaoGovernor is
     Governor,
     GovernorSettings,
@@ -23,36 +29,24 @@ contract DaoGovernor is
     GovernorVotesQuorumFraction,
     GovernorTimelockControl
 {
+    /*//////////////////////////////////////////////////////////////
+                               FUNCTIONS
+    //////////////////////////////////////////////////////////////*/
     constructor(
+        string memory name,
         IVotes token,
         TimelockController timelock
     )
-        Governor("DaoGovernor")
+        Governor(name)
         GovernorSettings(1 days, 1 weeks, 0)
         GovernorVotes(token)
         GovernorVotesQuorumFraction(10)
         GovernorTimelockControl(timelock)
     {}
 
-    // The following functions are overrides required by Solidity.
-
-    function state(uint256 proposalId) public view override(Governor, GovernorTimelockControl) returns (ProposalState) {
-        return super.state(proposalId);
-    }
-
-    function proposalNeedsQueuing(uint256 proposalId)
-        public
-        view
-        override(Governor, GovernorTimelockControl)
-        returns (bool)
-    {
-        return super.proposalNeedsQueuing(proposalId);
-    }
-
-    function proposalThreshold() public view override(Governor, GovernorSettings) returns (uint256) {
-        return super.proposalThreshold();
-    }
-
+    /*//////////////////////////////////////////////////////////////
+                           INTERNAL FUNCTIONS
+    //////////////////////////////////////////////////////////////*/
     function _propose(
         address[] memory targets,
         uint256[] memory values,
@@ -105,6 +99,29 @@ contract DaoGovernor is
         returns (uint256)
     {
         return super._cancel(targets, values, calldatas, descriptionHash);
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                             VIEW FUNCTIONS
+    //////////////////////////////////////////////////////////////*/
+    /// @inheritdoc IGovernor
+    function state(uint256 proposalId) public view override(Governor, GovernorTimelockControl) returns (ProposalState) {
+        return super.state(proposalId);
+    }
+
+    /// @inheritdoc IGovernor
+    function proposalNeedsQueuing(uint256 proposalId)
+        public
+        view
+        override(Governor, GovernorTimelockControl)
+        returns (bool)
+    {
+        return super.proposalNeedsQueuing(proposalId);
+    }
+
+    /// @inheritdoc IGovernor
+    function proposalThreshold() public view override(Governor, GovernorSettings) returns (uint256) {
+        return super.proposalThreshold();
     }
 
     function _executor() internal view override(Governor, GovernorTimelockControl) returns (address) {
