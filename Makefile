@@ -1,6 +1,6 @@
 -include .env
 
-.PHONY: all clean remove install update snapshot coverageReport gasReport anvil deploy submitProposal delegate vote queueProposal executeProposal
+.PHONY: all clean remove install update snapshot coverage-report gas-report anvil deploy submit-proposal delegate vote queue-proposal execute-proposal
 
 DEFAULT_ANVIL_KEY := 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 
@@ -18,13 +18,13 @@ install :; forge install cyfrin/foundry-devops@0.2.2 && forge install foundry-rs
 update:; forge update
 
 # Create test coverage report and save to .txt file
-coverageReport :; forge coverage --report debug > coverage.txt
+coverage-report :; forge coverage --report debug > coverage.txt
 
 # Generate Gas Snapshot
 snapshot :; forge snapshot
 
 # Generate table showing gas cost for each function
-gasReport :; forge test --gas-report
+gas-report :; forge test --gas-report > gas.txt
 
 anvil :; anvil -m 'test test test test test test test test test test test junk' --steps-tracing --block-time 1
 
@@ -52,14 +52,14 @@ deploy:
 delegate:
 	@ forge script script/Interactions.s.sol:Delegate $(NETWORK_ARGS)
 
-submitProposal:
+submit-proposal:
 	@ forge script script/Interactions.s.sol:SubmitProposal $(NETWORK_ARGS)
 
 vote:
 	@ forge script script/Interactions.s.sol:Vote $(NETWORK_ARGS)
 
-queueProposal:
+queue-proposal:
 	@ forge script script/Interactions.s.sol:QueueProposal $(NETWORK_ARGS)
 
-executeProposal:
+execute-proposal:
 	@ forge script script/Interactions.s.sol:ExecuteProposal $(NETWORK_ARGS)
