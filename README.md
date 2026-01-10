@@ -1,6 +1,6 @@
 # Project Name
 
-**⚠️ This is an educational project - not audited, use at your own risk**
+**⚠️ This project is not audited, use at your own risk**
 
 ## Table of Contents
 
@@ -238,10 +238,10 @@ forge verify-contract <CONTRACT_ADDRESS> src/MainContract.sol:MainContract --cha
 
 ### Deployment Addresses
 
-| Network | Contract Address | Explorer |
-|---------|------------------|----------|
-| Sepolia | `TBD` | [View on Etherscan](https://sepolia.etherscan.io) |
-| Mainnet | `TBD` | [View on Etherscan](https://etherscan.io) |
+| Network | Contract Address | Explorer                                          |
+| ------- | ---------------- | ------------------------------------------------- |
+| Sepolia | `TBD`            | [View on Etherscan](https://sepolia.etherscan.io) |
+| Mainnet | `TBD`            | [View on Etherscan](https://etherscan.io)         |
 
 ## Security
 
@@ -290,8 +290,8 @@ For production use, consider:
 
 ## Gas Optimization
 
-| Function | Gas Cost |
-|----------|----------|
+| Function    | Gas Cost |
+| ----------- | -------- |
 | `function1` | ~XXX,XXX |
 | `function2` | ~XXX,XXX |
 | `function3` | ~XXX,XXX |
