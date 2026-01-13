@@ -1,10 +1,12 @@
-# Project Name
+# Foundry DAO
 
-**⚠️ This is an educational project - not audited, use at your own risk**
+A complete decentralized autonomous organization (DAO) implementation built with Solidity, enabling on-chain governance with voting, proposal queuing, and time-locked execution.
+
+**⚠️ This project is not audited, use at your own risk**
 
 ## Table of Contents
 
-- [Project Name](#project-name)
+- [Foundry DAO](#foundry-dao)
   - [Table of Contents](#table-of-contents)
   - [About](#about)
     - [Key Features](#key-features)
@@ -14,6 +16,8 @@
     - [Quickstart](#quickstart)
     - [Environment Setup](#environment-setup)
   - [Usage](#usage)
+    - [Overview of DAO Workflow](#overview-of-dao-workflow)
+    - [Proposal Example: Changing DaoStorage State](#proposal-example-changing-daostorage-state)
     - [Build](#build)
     - [Testing](#testing)
     - [Test Coverage](#test-coverage)
@@ -33,64 +37,96 @@
 
 ## About
 
-[1-2 sentence description of what the contract does and its purpose]
+Foundry DAO is a fully functional decentralized autonomous organization that leverages the OpenZeppelin governance framework to provide transparent, democratic decision-making on the blockchain. The DAO uses ERC20 voting tokens, a Governor contract for proposal management, and a TimeLock contract to ensure security through a mandatory execution delay.
 
 ### Key Features
 
-- Feature 1
-- Feature 2
-- Feature 3
+- **ERC20 Governance Token** - Voting power based on token balance with delegation support
+- **Democratic Proposal & Voting System** - Community-driven proposals with transparent voting
+- **Time-Locked Execution** - Mandatory delay between proposal approval and execution for security
+- **Configurable Governance Parameters** - Voting delay, voting period, quorum, and proposal thresholds
+- **Full Test Coverage** - Comprehensive unit and integration tests
+- **Production-Ready Scripts** - Deployment and interaction scripts for all networks
 
 **Tech Stack:**
-- Solidity ^0.8.x
-- Foundry
-- [Other dependencies]
+- Solidity ^0.8.27
+- Foundry v1.11.0 (Forge, Cast, Anvil)
+- OpenZeppelin Contracts v5.5.0
+- foundry-devops v0.2.2 for deployment utilities
 
 ### Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                         Users/EOAs                          │
-└──────────────┬──────────────────────────────┬───────────────┘
-               │                              │
-               │ fund()                       │ withdraw()
-               │                              │ (owner only)
-               ▼                              ▼
-┌──────────────────────────────────────────────────────────────┐
-│                                                              │
-│                      Main Contract                           │
-│                                                              │
-│  ┌────────────────┐        ┌──────────────────┐              │
-│  │   Funders      │        │   Funding Goals  │              │
-│  │   Tracking     │        │   & Amounts      │              │
-│  └────────────────┘        └──────────────────┘              │
-│                                                              │
-└───────────────────┬──────────────────────────────────────────┘
-                    │
-                    │ getConversionRate()
-                    │
-                    ▼
-          ┌─────────────────────┐
-          │  Chainlink Oracle   │
-          │   Price Feed        │
-          └─────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                   DAO Token Holders / Voters                    │
+└──────────┬──────────────────────────────────────┬───────────────┘
+           │                                      │
+     delegate()                         propose() & vote()
+           │                                      │
+           ▼                                      ▼
+     ┌────────────────┐                    ┌─────────────────┐
+     │  DaoToken      │                    │   DaoGovernor   │
+     │ (ERC20)        │                    │   (Governor)    │
+     │                │                    │                 │
+     │ - Voting Power │                    │ - Proposals     │
+     │ - Transfer     │                    │ - Voting        │
+     │ - Delegate     │                    │ - Queue         │
+     └────────────────┘                    └─────┬───────────┘
+                                                 │
+                              (proposal approved by votes)
+                                                 │
+                                                 ▼
+                            ┌────────────────────────────────┐
+                            │      DaoTimeLock               │
+                            │   (TimelockController)         │
+                            │                                │
+                            │ - Enforces minDelay (1 day)    │
+                            │ - Permission control           │
+                            │ - Proposes & Executes actions  │
+                            └────────────┬───────────────────┘
+                                         │
+                         (executes after minDelay elapsed)
+                                         │
+                                         ▼
+                            ┌────────────────────────────────┐
+                            │      DaoStorage                │
+                            │      (Ownable Contract)        │
+                            │                                │
+                            │ - changeNumber()               │
+                            │ - onlyOwner (DaoTimeLock)      │
+                            │ - State managed by DAO         │
+                            └────────────────────────────────┘
 ```
 
 **Repository Structure:**
 ```
-project-name/
+foundry-dao/
 ├── src/
-│   ├── MainContract.sol       # Core contract logic
-│   └── PriceConverter.sol     # Helper library (if applicable)
+│   ├── DaoToken.sol          # ERC20 governance token with voting power
+│   ├── DaoGovernor.sol       # Main governance contract for proposals and voting
+│   ├── DaoTimeLock.sol       # Time lock for secure execution delays
+│   └── DaoStorage.sol        # Example storage contract governed by DAO
 ├── script/
-│   ├── DeployContract.s.sol   # Deployment script
-│   └── Interactions.s.sol     # Interaction scripts
+│   ├── DeployDao.s.sol       # Deployment script for all DAO contracts
+│   ├── HelperConfig.s.sol    # Network configuration and constants
+│   └── Interactions.s.sol    # Scripts for proposal/voting interactions
 ├── test/
 │   ├── unit/
-│   │   └── ContractTest.t.sol
+│   │   ├── DaoTokenTest.t.sol        # Token and voting tests
+│   │   └── DaoStorageTest.t.sol      # Storage contract tests
 │   └── integration/
-│       └── InteractionsTest.t.sol
-└── lib/                        # Dependencies
+│       ├── DaoTest.t.sol             # Full DAO workflow tests
+│       ├── DeployDaoTest.t.sol       # Deployment tests
+│       └── InteractionsTest.t.sol    # Interaction script tests
+├── lib/                        # Dependencies
+│   ├── forge-std/
+│   ├── foundry-devops/
+│   └── openzeppelin-contracts/
+├── cache/                      # Cached build files
+├── foundry.toml               # Foundry configuration
+├── Makefile                   # Build and deployment commands
+├── README.md                  # This file
+└── .env.example              # Environment variables template
 ```
 
 ## Getting Started
@@ -105,8 +141,8 @@ project-name/
 ### Quickstart
 
 ```bash
-git clone https://github.com/yourusername/project-name
-cd project-name
+git clone https://github.com/0xGearhart/foundry-dao
+cd foundry-dao
 make install
 forge build
 ```
@@ -120,8 +156,10 @@ forge build
 
 2. **Configure your `.env` file:**
    ```bash
-   SEPOLIA_RPC_URL=your_sepolia_rpc_url_here
-   MAINNET_RPC_URL=your_mainnet_rpc_url_here
+   ETH_MAINNET_RPC_URL=your_eth_mainnet_rpc_url_here
+   ETH_SEPOLIA_RPC_URL=your_eth_sepolia_rpc_url_here
+   ARB_MAINNET_RPC_URL=your_arbitrum_mainnet_rpc_url_here
+   ARB_SEPOLIA_RPC_URL=your_arbitrum_sepolia_rpc_url_here
    ETHERSCAN_API_KEY=your_etherscan_api_key_here
    DEFAULT_KEY_ADDRESS=public_address_of_your_encrypted_private_key_here
    ```
@@ -151,7 +189,156 @@ cast wallet import <account_name> --interactive
 
 ## Usage
 
-[Short description of usage if needed]
+### Overview of DAO Workflow
+
+1. **Token Distribution** - Deployer receives initial DAO tokens
+2. **Delegation** - Token holders delegate voting power to themselves or others
+3. **Proposal Submission** - Token holders with sufficient voting power submit proposals
+4. **Voting Period** - Community votes on the proposal (1 week by default)
+5. **Queue & Execute** - If approved, proposal enters timelock, then can be executed (1 day delay minimum)
+6. **Execution** - Proposal executes changes to governed contracts
+
+### Proposal Example: Changing DaoStorage State
+
+Here's a complete walkthrough of how a DAO proposal goes from submission to execution:
+
+**Setup:**
+- You have 100 DAO tokens
+- Current value in DaoStorage: `0`
+- Goal: Change it to `42`
+
+**Step 1: Delegate Voting Power**
+```bash
+# Delegate to yourself (required to have voting power)
+make delegate ARGS="--network eth sepolia"
+```
+- You now have voting power equal to your token balance
+- This voting power is calculated from the block when the proposal was created
+
+**Step 2: Submit Proposal**
+```bash
+# Submit proposal to change number to 42
+make submit-proposal ARGS="--network eth sepolia"
+```
+
+Behind the scenes, this executes:
+```solidity
+// From Interactions.s.sol
+address[] memory targets = [address(daoStorage)];
+uint256[] memory values = [0];
+bytes[] memory calldatas = [abi.encodeWithSignature("changeNumber(uint256)", 42)];
+string memory description = "update number to 42";
+
+daoGovernor.propose(targets, values, calldatas, description);
+```
+
+**Result:**
+- Proposal is created with a unique `proposalId`
+- Voting starts after `votingDelay` (1 day)
+- Proposal ID can be obtained using:
+```bash
+cast call <DAO_GOVERNOR_ADDRESS> "getProposalId(address[],uint256[],bytes[],bytes32)" \
+  "[<DAO_STORAGE_ADDRESS>]" "[0]" \
+  "[0x4d33fed10000000000000000000000000000000000000000000000000000000000000000]" \
+  "<DESCRIPTION_HASH>"
+```
+
+**Step 3: Vote on Proposal**
+After voting delay, vote on the proposal:
+
+```bash
+# Vote "For" on the proposal
+make vote ARGS="--network eth sepolia"
+```
+
+Behind the scenes:
+```solidity
+// From Interactions.s.sol
+uint256 proposalId = daoGovernor.getProposalId(targets, values, calldatas, descriptionHash);
+daoGovernor.castVoteWithReason(
+    proposalId,
+    uint8(GovernorCountingSimple.VoteType.For),  // 1 = For, 0 = Against, 2 = Abstain
+    "The answer to life, the universe, and everything"
+);
+```
+
+**Result:**
+- Your 100 tokens are counted as "For" votes
+- Other token holders can vote during the `votingPeriod` (1 week)
+- Voting power is determined by the balance at the proposal creation block (snapshot)
+
+**Step 4: Check Proposal Passed**
+After voting period ends (7 days), check if proposal succeeded:
+
+```bash
+# Check proposal state
+cast call <DAO_GOVERNOR_ADDRESS> "state(uint256)" "<PROPOSAL_ID>"
+# Returns: 4 = Succeeded, 3 = Defeated
+
+# View vote counts
+cast call <DAO_GOVERNOR_ADDRESS> "proposalVotes(uint256)" "<PROPOSAL_ID>"
+# Returns: [forVotes, againstVotes, abstainVotes]
+```
+
+**Step 5: Queue Proposal**
+Queue the successful proposal for execution:
+
+```bash
+make queue-proposal ARGS="--network eth sepolia"
+```
+
+Behind the scenes:
+```solidity
+daoGovernor.queue(targets, values, calldatas, descriptionHash);
+```
+
+**Result:**
+- Proposal moves to "Queued" state
+- Timelock starts: proposal cannot execute for `minDelay` (1 day)
+- During this period, community can exit the DAO if they disagree
+
+**Step 6: Execute Proposal**
+After minimum delay has elapsed (24 hours), execute the proposal:
+
+```bash
+make execute-proposal ARGS="--network eth sepolia"
+```
+
+Behind the scenes:
+```solidity
+daoGovernor.execute(targets, values, calldatas, descriptionHash);
+```
+
+This calls:
+```solidity
+// DaoStorage.changeNumber(42) is invoked
+// onlyOwner modifier checks that msg.sender == owner
+// owner is set to address(daoTimeLock)
+// DaoTimeLock calls changeNumber, so the check passes
+s_number = 42;
+emit NumberChanged(42);
+```
+
+**Step 7: Verify Execution**
+Confirm the state change:
+
+```bash
+# Check the new value
+cast call <DAO_STORAGE_ADDRESS> "getNumber()"
+# Returns: 42 (in hex: 0x000000000000000000000000000000000000000000000000000000000000002a)
+```
+
+**Timeline Summary:**
+| Phase                 | Duration                | What Happens                                  |
+| --------------------- | ----------------------- | --------------------------------------------- |
+| Pending               | `votingDelay` (1 day)   | Proposal created, waiting for voting to start |
+| Active                | `votingPeriod` (1 week) | Community votes                               |
+| Defeated or Succeeded | -                       | Voting ended                                  |
+| Queued                | -                       | Proposal queued for execution                 |
+| Timelocked            | `minDelay` (1 day)      | Waiting before execution allowed              |
+| Executed              | -                       | Proposal executed on target contract          |
+
+**Total Time:** ~9 days minimum from proposal to execution (1 day delay + 7 day voting + 1 day timelock)
 
 ### Build
 
@@ -205,27 +392,63 @@ make deploy
 
 ### Interact with Contract
 
-[Examples of how to interact with your contract using cast or scripts]
-
+**Delegate voting power to yourself:**
 ```bash
-# Example command
-cast send <CONTRACT_ADDRESS> "functionName()" --rpc-url $SEPOLIA_RPC_URL --account defaultKey
+make delegate ARGS="--network eth sepolia"
+```
+
+**Submit a proposal:**
+```bash
+make submit-proposal ARGS="--network eth sepolia"
+```
+
+**Vote on a proposal:**
+```bash
+make vote ARGS="--network eth sepolia"
+```
+
+**Queue an approved proposal:**
+```bash
+make queue-proposal ARGS="--network eth sepolia"
+```
+
+**Execute a queued proposal (after timelock delay):**
+```bash
+make execute-proposal ARGS="--network eth sepolia"
+```
+
+**View proposal details using cast:**
+```bash
+# Get proposal ID
+cast call <DAO_GOVERNOR_ADDRESS> "getProposalId(address[],uint256[],bytes[],bytes32)" "[<TARGET>]" "[0]" "[<CALLDATA>]" "<DESCRIPTION_HASH>"
+
+# Check proposal state
+cast call <DAO_GOVERNOR_ADDRESS> "state(uint256)" "<PROPOSAL_ID>"
+
+# Get votes received
+cast call <DAO_GOVERNOR_ADDRESS> "proposalVotes(uint256)" "<PROPOSAL_ID>"
 ```
 
 ## Deployment
 
 ### Deploy to Testnet
 
-Deploy to Sepolia:
+Deploy to Ethereum Sepolia:
 
 ```bash
-make deploy ARGS="--network sepolia"
+make deploy ARGS="--network eth sepolia"
+```
+
+Deploy to Arbitrum Sepolia:
+
+```bash
+make deploy ARGS="--network arb sepolia"
 ```
 
 Or using forge directly:
 
 ```bash
-forge script script/DeployContract.s.sol:DeployContract --rpc-url $SEPOLIA_RPC_URL --account defaultKey --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY -vvvv
+forge script script/DeployDao.s.sol:DeployDao --rpc-url $ETH_SEPOLIA_RPC_URL --account defaultKey --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY -vvvv
 ```
 
 ### Verify Contract
@@ -233,15 +456,25 @@ forge script script/DeployContract.s.sol:DeployContract --rpc-url $SEPOLIA_RPC_U
 If automatic verification fails:
 
 ```bash
-forge verify-contract <CONTRACT_ADDRESS> src/MainContract.sol:MainContract --chain-id 11155111 --etherscan-api-key $ETHERSCAN_API_KEY
+# Sepolia
+forge verify-contract <CONTRACT_ADDRESS> src/DaoToken.sol:DaoToken --chain-id 11155111 --etherscan-api-key $ETHERSCAN_API_KEY
+
+# Arbitrum Sepolia
+forge verify-contract <CONTRACT_ADDRESS> src/DaoGovernor.sol:DaoGovernor --chain-id 421614 --etherscan-api-key $ETHERSCAN_API_KEY
 ```
 
 ### Deployment Addresses
 
-| Network | Contract Address | Explorer |
-|---------|------------------|----------|
-| Sepolia | `TBD` | [View on Etherscan](https://sepolia.etherscan.io) |
-| Mainnet | `TBD` | [View on Etherscan](https://etherscan.io) |
+| Network          | Contract    | Address | Explorer                                          |
+| ---------------- | ----------- | ------- | ------------------------------------------------- |
+| Sepolia          | DaoToken    | `TBD`   | [View on Etherscan](https://sepolia.etherscan.io) |
+| Sepolia          | DaoGovernor | `TBD`   | [View on Etherscan](https://sepolia.etherscan.io) |
+| Sepolia          | DaoTimeLock | `TBD`   | [View on Etherscan](https://sepolia.etherscan.io) |
+| Sepolia          | DaoStorage  | `TBD`   | [View on Etherscan](https://sepolia.etherscan.io) |
+| Arbitrum Sepolia | DaoToken    | `TBD`   | [View on Arbiscan](https://sepolia.arbiscan.io)   |
+| Arbitrum Sepolia | DaoGovernor | `TBD`   | [View on Arbiscan](https://sepolia.arbiscan.io)   |
+| Arbitrum Sepolia | DaoTimeLock | `TBD`   | [View on Arbiscan](https://sepolia.arbiscan.io)   |
+| Arbitrum Sepolia | DaoStorage  | `TBD`   | [View on Arbiscan](https://sepolia.arbiscan.io)   |
 
 ## Security
 
@@ -256,56 +489,129 @@ For production use, consider:
 
 ### Access Control (Roles & Permissions)
 
-[Examples from previous project to be replaced by actual project layout in brackets below. Remove section if no roles or ownership used]
+The DAO implements OpenZeppelin's `TimelockController` for role-based access control with the following roles:
 
-[The protocol implements OpenZeppelin's `AccessControl` and `Ownable` for fine-grained permission management:]
+**Core Roles (defined in DaoTimeLock):**
 
-**Roles:** [Remove if roles are not used]
-- [**`MINT_AND_BURN_ROLE`**: Critical role for minting and burning RBT tokens
-  - Granted to `Vault` contract (for deposit/withdrawal operations)
-  - Granted to `RebaseTokenPool` contract (for cross-chain operations)
-  - Only the owner can grant this role]
+- **`DEFAULT_ADMIN_ROLE` (0x00)**
+  - Granted to: Deployer (immediately revoked after setup to prevent centralization)
+  - Permissions: Grant/revoke other roles
+  - Note: This role is renounced during deployment to ensure decentralization
 
-**Owner Permissions:**  [Remove if owner is not used]
-- [`setInterestRate()`: Decrease the global interest rate (can only decrease, never increase)]
-- [`grantMintAndBurnRole()`: Grant minting/burning permissions to authorized contracts]
+- **`PROPOSER_ROLE` (keccak256("PROPOSER_ROLE"))**
+  - Granted to: `DaoGovernor` contract only
+  - Permissions: Submit proposals to the timelock
+  - Only the DAO Governor can propose execution of transactions
+  - Prevents unauthorized addresses from queuing operations
 
-**Access Control Vulnerabilities & Mitigations:** 
-- [⚠️ **Risk**: Owner could grant `MINT_AND_BURN_ROLE` to malicious actor
-  - **Mitigation**: Use multi-sig wallet for owner role in production]
-- [⚠️ **Risk**: Owner control of interest rate changes
-  - **Mitigation**: Decentralize rate changes through governance in production]
+- **`EXECUTOR_ROLE` (keccak256("EXECUTOR_ROLE"))**
+  - Granted to: `address(0)` (anyone can execute)
+  - Permissions: Execute queued proposals after minimum delay
+  - Allows permissionless execution of approved proposals
+  - Enforces the `minDelay` time lock between approval and execution
+
+**DaoStorage Contract:**
+
+- **`Ownable` pattern** 
+  - Owner: `DaoTimeLock` contract
+  - Permissions: `changeNumber()` function (can only be called by owner)
+  - State changes to the DAO-governed contract must go through the governance process
+
+**Governance Parameters (DaoGovernor):**
+
+| Parameter             | Value  | Purpose                                                                                  |
+| --------------------- | ------ | ---------------------------------------------------------------------------------------- |
+| `votingDelay`         | 1 day  | Delay between proposal submission and voting start                                       |
+| `votingPeriod`        | 1 week | Duration of the voting period                                                            |
+| `proposalThreshold`   | 0      | Minimum voting power required to submit a proposal (0 = any submitted proposal is valid) |
+| `quorumNumerator`     | 10%    | Percentage of total supply needed for quorum                                             |
+| `minDelay` (TimeLock) | 1 day  | Minimum delay before execution of approved proposals                                     |
+
+**Access Control Diagram:**
+
+```
+External Users (EOAs)
+        │
+        ├─→ Can delegate voting power
+        ├─→ Can vote on proposals (if delegated)
+        └─→ Can submit proposals (if delegated)
+                │
+                ▼
+        DaoGovernor (Governor)
+                │
+                ├─→ PROPOSER_ROLE to DaoTimeLock
+                └─→ Proposal approved by votes
+                        │
+                        ▼
+                DaoTimeLock (TimelockController)
+                │
+                ├─→ Enforces minDelay (1 day)
+                │
+                ├─→ EXECUTOR_ROLE = address(0)
+                │   (anyone can execute after delay)
+                │
+                └─→ DaoStorage contract
+                        │
+                        └─→ changeNumber() - onlyOwner
+                            (owner = DaoTimeLock)
+```
+
+**Vulnerability Mitigations:**
+
+✅ **Role Separation**: PROPOSER and EXECUTOR roles are separated and controlled by the Governor and permissionless execution, respectively.
+
+✅ **Timelock Delay**: All state changes go through a mandatory 1-day delay, allowing users to exit if they disagree.
+
+✅ **Decentralized Admin**: The DEFAULT_ADMIN_ROLE is revoked during deployment, removing centralized control.
+
+✅ **Voting Power Snapshots**: Voting power is based on historical token balances, preventing flash loan attacks.
+
+⚠️ **Consideration**: The quorum requirement (10%) should be monitored to ensure healthy participation levels.
 
 ### Known Limitations
 
-- [Limitation 1 - e.g., centralized owner control]
-- [Limitation 2 - e.g., no withdrawal limits]
-- [Limitation 3 - e.g., relies on external oracle]
+- **No proposal veto mechanism** - Once a proposal passes voting and timelock delay, it will execute without additional checks
+- **Quorum requirement is percentage-based** - If token distribution becomes too concentrated, quorum may become too easy to reach
+- **No upgrade mechanism** - Governance contracts cannot be upgraded; any changes require new deployments
+- **Single example contract** - DaoStorage is a simple example; real DAO would govern more critical systems
 
 **Centralization Risks:**
-- [Explain any admin/owner privileges]
 
-**Oracle Dependencies:**
-- [Explain reliance on Chainlink or other oracles]
+- The deployer initially controls all tokens, but this can be mitigated by distributing tokens fairly
+- The deployer nominates the initial timelock admin role, which is immediately revoked
+
+**External Dependencies:**
+
+- OpenZeppelin Contracts library (v5.5.0) - thoroughly audited and battle-tested
 
 ## Gas Optimization
 
-| Function | Gas Cost |
-|----------|----------|
-| `function1` | ~XXX,XXX |
-| `function2` | ~XXX,XXX |
-| `function3` | ~XXX,XXX |
+The DAO implementation uses OpenZeppelin's optimized governance contracts. Key gas-efficient design patterns:
+
+- **Vote delegation** - Voting power is delegated by users themselves (not assigned by contract)
+- **Governor storage extension** - Efficiently stores proposal details with minimal redundancy
+- **Batch operations** - Proposals support multiple target contracts in a single proposal
+
+**Function Gas Estimates:**
+
+| Function               | Approx. Gas Cost |
+| ---------------------- | ---------------- |
+| `delegate()`           | ~95,542          |
+| `propose()`            | ~293,094         |
+| `castVoteWithReason()` | ~84,650          |
+| `queue()`              | ~144,503         |
+| `execute()`            | ~112,000         |
 
 Generate gas report:
 
 ```bash
-forge test --gas-report
+make gas-report
 ```
 
 Generate gas snapshot:
 
 ```bash
-forge snapshot
+make snapshot
 ```
 
 Compare gas changes:
