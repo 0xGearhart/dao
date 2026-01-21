@@ -2,7 +2,7 @@
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-pragma solidity ^0.8.27;
+pragma solidity 0.8.33;
 
 /**
  * @title DaoStorage

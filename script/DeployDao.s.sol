@@ -8,7 +8,7 @@ import {CodeConstants, HelperConfig} from "./HelperConfig.s.sol";
 import {IVotes} from "@openzeppelin/contracts/governance/utils/IVotes.sol";
 import {Script} from "forge-std/Script.sol";
 
-pragma solidity ^0.8.27;
+pragma solidity 0.8.33;
 
 contract DeployDao is Script, CodeConstants {
     bytes32 public constant PROPOSER_ROLE = keccak256("PROPOSER_ROLE");

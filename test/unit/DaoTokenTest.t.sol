@@ -5,7 +5,7 @@ import {DaoToken} from "../../src/DaoToken.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import {Test, console} from "forge-std/Test.sol";
 
-pragma solidity ^0.8.27;
+pragma solidity 0.8.33;
 
 contract DaoTokenTest is Test, CodeConstants {
     DaoToken public daoToken;

@@ -9,7 +9,7 @@ import {DaoTimeLock} from "../../src/DaoTimeLock.sol";
 import {DaoToken} from "../../src/DaoToken.sol";
 import {Test} from "forge-std/Test.sol";
 
-pragma solidity ^0.8.27;
+pragma solidity 0.8.33;
 
 contract InteractionsTest is Test, CodeConstants {
     DeployDao public deployDao;

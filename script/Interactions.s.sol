@@ -5,7 +5,7 @@ import {DaoToken} from "../src/DaoToken.sol";
 import {HelperConfig} from "./HelperConfig.s.sol";
 import {Script} from "forge-std/Script.sol";
 
-pragma solidity ^0.8.27;
+pragma solidity 0.8.33;
 
 contract InteractionsData {
     // addresses

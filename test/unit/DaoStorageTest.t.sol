@@ -3,7 +3,7 @@
 import {DaoStorage, Ownable} from "../../src/DaoStorage.sol";
 import {Test} from "forge-std/Test.sol";
 
-pragma solidity ^0.8.27;
+pragma solidity 0.8.33;
 
 contract DaoStorageTest is Test {
     event NumberChanged(uint256 indexed newNumber);
