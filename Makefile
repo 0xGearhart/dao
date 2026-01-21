@@ -1,6 +1,6 @@
 -include .env
 
-.PHONY: all clean remove install update snapshot coverage-report gas-report anvil deploy submit-proposal delegate vote queue-proposal execute-proposal
+.PHONY: all clean remove install update build snapshot coverage-report gas-report anvil deploy submit-proposal delegate vote queue-proposal execute-proposal
 
 DEFAULT_ANVIL_KEY := 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 
@@ -16,6 +16,8 @@ install :; forge install cyfrin/foundry-devops@0.2.2 && forge install foundry-rs
 
 # Update Dependencies
 update:; forge update
+
+build:; forge build
 
 # Create test coverage report and save to .txt file
 coverage-report :; forge coverage --report debug > coverage.txt
