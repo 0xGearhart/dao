@@ -1,4 +1,4 @@
-# Foundry DAO
+# DAO
 
 A complete decentralized autonomous organization (DAO) implementation built with Solidity, enabling on-chain governance with voting, proposal queuing, and time-locked execution.
 
@@ -6,7 +6,7 @@ A complete decentralized autonomous organization (DAO) implementation built with
 
 ## Table of Contents
 
-- [Foundry DAO](#foundry-dao)
+- [DAO](#dao)
   - [Table of Contents](#table-of-contents)
   - [About](#about)
     - [Key Features](#key-features)
@@ -49,7 +49,7 @@ Foundry DAO is a fully functional decentralized autonomous organization that lev
 - **Production-Ready Scripts** - Deployment and interaction scripts for all networks
 
 **Tech Stack:**
-- Solidity ^0.8.27
+- Solidity 0.8.33
 - Foundry v1.11.0 (Forge, Cast, Anvil)
 - OpenZeppelin Contracts v5.5.0
 - foundry-devops v0.2.2 for deployment utilities
@@ -100,7 +100,7 @@ Foundry DAO is a fully functional decentralized autonomous organization that lev
 
 **Repository Structure:**
 ```
-foundry-dao/
+dao/
 ├── src/
 │   ├── DaoToken.sol          # ERC20 governance token with voting power
 │   ├── DaoGovernor.sol       # Main governance contract for proposals and voting
@@ -141,8 +141,8 @@ foundry-dao/
 ### Quickstart
 
 ```bash
-git clone https://github.com/0xGearhart/foundry-dao
-cd foundry-dao
+git clone https://github.com/0xGearhart/dao
+cd dao
 make
 ```
 
