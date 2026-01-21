@@ -143,8 +143,7 @@ foundry-dao/
 ```bash
 git clone https://github.com/0xGearhart/foundry-dao
 cd foundry-dao
-make install
-forge build
+make
 ```
 
 ### Environment Setup
